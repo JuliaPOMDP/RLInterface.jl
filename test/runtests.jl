@@ -2,7 +2,7 @@ using DeepRL
 using POMDPModels
 using Base.Test
 
-function sim(env, nsteps=100, rng=MersenneTwister())
+function sim(env, nsteps=100, rng=MersenneTwister(0))
     o = reset(env)
     step = 1
     done = false

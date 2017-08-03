@@ -4,7 +4,7 @@
 module DeepRL
 
 using POMDPs
-using GenerativeModels
+
 
 export 
     # Environment types
@@ -21,24 +21,24 @@ export
     render
 
 
-abstract AbstractEnvironment
+abstract type AbstractEnvironment end
 
-type MDPEnvironment{S} <: AbstractEnvironment
+mutable struct MDPEnvironment{S} <: AbstractEnvironment
     problem::MDP 
     state::S
     rng::AbstractRNG
 end
-function MDPEnvironment(problem::MDP; rng::AbstractRNG=MersenneTwister())
-    return MDPEnvironment(problem, create_state(problem), rng)
+function MDPEnvironment(problem::MDP; rng::AbstractRNG=MersenneTwister(0))
+    return MDPEnvironment(problem, initial_state(problem, rng), rng)
 end
 
-type POMDPEnvironment{S} <: AbstractEnvironment
+mutable struct POMDPEnvironment{S} <: AbstractEnvironment
     problem::POMDP 
     state::S
     rng::AbstractRNG
 end
-function POMDPEnvironment(problem::POMDP; rng::AbstractRNG=MersenneTwister())
-    return POMDPEnvironment(problem, create_state(problem), rng)
+function POMDPEnvironment(problem::POMDP; rng::AbstractRNG=MersenneTwister(0))
+    return POMDPEnvironment(problem, initial_state(problem, rng), rng)
 end
 
 """
@@ -75,7 +75,7 @@ function step!{A}(env::MDPEnvironment, a::A)
     env.state = s
     t = isterminal(env.problem, s)
     info = nothing
-    obs = vec(env.problem, s)
+    obs = convert(Array{Float64}, s, env.problem)
     return obs, r, t, info
 end
 
@@ -90,7 +90,7 @@ function step!{A}(env::POMDPEnvironment, a::A)
     env.state = s
     t = isterminal(env.problem, s)
     info = nothing
-    obs = vec(env.problem, o)
+    obs = convert(Array{Float64}, o, env.problem)
     return obs, r, t, info
 end
 
@@ -107,7 +107,7 @@ end
 Sample an action from the action space of the environment.
 """
 function sample_action(env::Union{POMDPEnvironment, MDPEnvironment})
-    return rand(env.rng, actions(env), create_action(env.problem))
+    return rand(env.rng, actions(env))
 end
 
 """
@@ -120,17 +120,18 @@ end
 
 
 function obs_dimensions(env::MDPEnvironment)
-    return size(vec(env.problem, create_state(env.problem))) 
+    return size(convert(Array{Float64}, initial_state(env.problem, env.rng), env.problem))
 end
 
 
 function obs_dimensions(env::POMDPEnvironment)
-    return size(vec(env.problem, create_observation(env.problem))) 
+    return size(convert(Array{Float64}, generate_o(env.problem, initial_state(env.problem, env.rng), env.rng), env.problem))
 end
+
 """
     render(env::AbstractEnvironment)
 Renders a graphic of the environment
 """
-POMDPs.@pomdp_func render(env::AbstractEnvironment)
+function render(env::AbstractEnvironment) end
 
 end # module
