@@ -4,7 +4,7 @@
 module DeepRL
 
 using POMDPs
-using GenerativeModels
+
 
 export 
     # Environment types
@@ -21,23 +21,23 @@ export
     render
 
 
-abstract AbstractEnvironment
+abstract type AbstractEnvironment end
 
-type MDPEnvironment{S} <: AbstractEnvironment
+mutable struct MDPEnvironment{S} <: AbstractEnvironment
     problem::MDP 
     state::S
     rng::AbstractRNG
 end
-function MDPEnvironment(problem::MDP; rng::AbstractRNG=MersenneTwister())
+function MDPEnvironment(problem::MDP; rng::AbstractRNG=MersenneTwister(0))
     return MDPEnvironment(problem, create_state(problem), rng)
 end
 
-type POMDPEnvironment{S} <: AbstractEnvironment
+mutable struct POMDPEnvironment{S} <: AbstractEnvironment
     problem::POMDP 
     state::S
     rng::AbstractRNG
 end
-function POMDPEnvironment(problem::POMDP; rng::AbstractRNG=MersenneTwister())
+function POMDPEnvironment(problem::POMDP; rng::AbstractRNG=MersenneTwister(0))
     return POMDPEnvironment(problem, create_state(problem), rng)
 end
 
@@ -127,10 +127,11 @@ end
 function obs_dimensions(env::POMDPEnvironment)
     return size(vec(env.problem, create_observation(env.problem))) 
 end
+
 """
     render(env::AbstractEnvironment)
 Renders a graphic of the environment
 """
-POMDPs.@pomdp_func render(env::AbstractEnvironment)
+function render(env::AbstractEnvironment) end
 
 end # module
