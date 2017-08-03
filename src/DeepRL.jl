@@ -29,7 +29,7 @@ mutable struct MDPEnvironment{S} <: AbstractEnvironment
     rng::AbstractRNG
 end
 function MDPEnvironment(problem::MDP; rng::AbstractRNG=MersenneTwister(0))
-    return MDPEnvironment(problem, create_state(problem), rng)
+    return MDPEnvironment(problem, initial_state(problem, rng), rng)
 end
 
 mutable struct POMDPEnvironment{S} <: AbstractEnvironment
@@ -38,7 +38,7 @@ mutable struct POMDPEnvironment{S} <: AbstractEnvironment
     rng::AbstractRNG
 end
 function POMDPEnvironment(problem::POMDP; rng::AbstractRNG=MersenneTwister(0))
-    return POMDPEnvironment(problem, create_state(problem), rng)
+    return POMDPEnvironment(problem, initial_state(problem, rng), rng)
 end
 
 """
@@ -75,7 +75,7 @@ function step!{A}(env::MDPEnvironment, a::A)
     env.state = s
     t = isterminal(env.problem, s)
     info = nothing
-    obs = vec(env.problem, s)
+    obs = convert(Array{Float64}, s, env.problem)
     return obs, r, t, info
 end
 
@@ -90,7 +90,7 @@ function step!{A}(env::POMDPEnvironment, a::A)
     env.state = s
     t = isterminal(env.problem, s)
     info = nothing
-    obs = vec(env.problem, o)
+    obs = convert(Array{Float64}, o, env.problem)
     return obs, r, t, info
 end
 
@@ -107,7 +107,7 @@ end
 Sample an action from the action space of the environment.
 """
 function sample_action(env::Union{POMDPEnvironment, MDPEnvironment})
-    return rand(env.rng, actions(env), create_action(env.problem))
+    return rand(env.rng, actions(env))
 end
 
 """
@@ -120,12 +120,12 @@ end
 
 
 function obs_dimensions(env::MDPEnvironment)
-    return size(vec(env.problem, create_state(env.problem))) 
+    return size(convert(Array{Float64}, initial_state(env.problem, env.rng), env.problem))
 end
 
 
 function obs_dimensions(env::POMDPEnvironment)
-    return size(vec(env.problem, create_observation(env.problem))) 
+    return size(convert(Array{Float64}, generate_o(env.problem, initial_state(env.problem, env.rng), env.rng), env.problem))
 end
 
 """
