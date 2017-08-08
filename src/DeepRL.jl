@@ -134,4 +134,6 @@ Renders a graphic of the environment
 """
 function render(env::AbstractEnvironment) end
 
+include("ZMQServer.jl")
+
 end # module
