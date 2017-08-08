@@ -48,7 +48,7 @@ Reset an MDP environment by sampling an initial state returning it.
 function Base.reset(env::MDPEnvironment)
     s = initial_state(env.problem, env.rng)
     env.state = s
-    return s
+    return convert(Array{Float64}, s, env.problem)
 end
 
 """
@@ -60,7 +60,7 @@ function Base.reset(env::POMDPEnvironment)
     s = initial_state(env.problem, env.rng)
     env.state = s
     o = generate_o(env.problem, s, env.rng)
-    return o
+    return convert(Array{Float64, 1}, o, env.problem)
 end
 
 
