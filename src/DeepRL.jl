@@ -77,7 +77,7 @@ Take in an POMDP environment, and an action to execute, and
 step the environment forward. Return the state, reward, 
 terminal flag and info
 """
-function step!{A}(env::MDPEnvironment, a::A)
+function step!(env::MDPEnvironment, a::A) where A
     s, r = generate_sr(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
@@ -92,7 +92,7 @@ Take in an MDP environment, and an action to execute, and
 step the environment forward. Return the observation, reward, 
 terminal flag and info
 """
-function step!{A}(env::POMDPEnvironment, a::A)
+function step!(env::POMDPEnvironment, a::A) where A
     s, o, r = generate_sor(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
