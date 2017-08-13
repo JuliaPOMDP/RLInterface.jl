@@ -1,11 +1,3 @@
-module ZMQServer
-
-using ZMQ
-using DeepRL
-using JSON
-
-import Logging
-
 struct ZMQTransport
     ctx::Context
     sock::Socket
@@ -44,7 +36,7 @@ function sendresp(conn::ZMQTransport, msgstr)
     ZMQ.send(conn.sock, JSON.json(msgstr))
 end
 
-function process(msg::Dict{String, Any})
+function process!(env::AbstractEnvironment, msg::Dict{String, Any})
     if "cmd" in keys(msg)
         if msg["cmd"] == "obs_dimensions"
             respmsg = Dict("obs_dim"=>obs_dimensions(env))
@@ -67,21 +59,19 @@ function process(msg::Dict{String, Any})
     respmsg
 end
 
-function run_env_server(ip, port, prob; pomdp=false)
-    if pomdp
-        env = POMDPEnvironment(prob)
-    else
+function run_env_server(ip, port, prob; fully_observable=!isa(prob, POMDP))
+    if fully_observable
         env = MDPEnvironment(prob)
+    else
+        env = POMDPEnvironment(prob)
     end
     conn = ZMQTransport(ip, port, ZMQ.REP, true)
     Logging.debug("running server...")
     while true
         msg = JSON.parse(recvreq(conn))
         Logging.info("received request: ", msg)
-        respmsg = process(msg)
+        respmsg = process!(env, msg)
         sendresp(conn, respmsg)
     end
     close(conn)
-end
-
 end

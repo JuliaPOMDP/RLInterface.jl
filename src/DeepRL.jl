@@ -5,6 +5,13 @@ module DeepRL
 
 using POMDPs
 
+# for the ZMQ part
+using ZMQ
+using DeepRL
+using JSON
+
+import Logging
+
 
 export 
     # Environment types
