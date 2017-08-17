@@ -55,7 +55,7 @@ Reset an MDP environment by sampling an initial state returning it.
 function Base.reset(env::MDPEnvironment)
     s = initial_state(env.problem, env.rng)
     env.state = s
-    return convert(Array{Float64}, s, env.problem)
+    return convert_s(Array{Float64}, s, env.problem)
 end
 
 """
@@ -67,7 +67,7 @@ function Base.reset(env::POMDPEnvironment)
     s = initial_state(env.problem, env.rng)
     env.state = s
     o = generate_o(env.problem, s, env.rng)
-    return convert(Array{Float64, 1}, o, env.problem)
+    return convert_o(Array{Float64, 1}, o, env.problem)
 end
 
 
@@ -82,7 +82,7 @@ function step!(env::MDPEnvironment, a::A) where A
     env.state = s
     t = isterminal(env.problem, s)
     info = nothing
-    obs = convert(Array{Float64}, s, env.problem)
+    obs = convert_s(Array{Float64}, s, env.problem)
     return obs, r, t, info
 end
 
@@ -97,7 +97,7 @@ function step!(env::POMDPEnvironment, a::A) where A
     env.state = s
     t = isterminal(env.problem, s)
     info = nothing
-    obs = convert(Array{Float64}, o, env.problem)
+    obs = convert_o(Array{Float64}, o, env.problem)
     return obs, r, t, info
 end
 
@@ -127,12 +127,12 @@ end
 
 
 function obs_dimensions(env::MDPEnvironment)
-    return size(convert(Array{Float64}, initial_state(env.problem, env.rng), env.problem))
+    return size(convert_s(Array{Float64}, initial_state(env.problem, env.rng), env.problem))
 end
 
 
 function obs_dimensions(env::POMDPEnvironment)
-    return size(convert(Array{Float64}, generate_o(env.problem, initial_state(env.problem, env.rng), env.rng), env.problem))
+    return size(convert_o(Array{Float64}, generate_o(env.problem, initial_state(env.problem, env.rng), env.rng), env.problem))
 end
 
 """
