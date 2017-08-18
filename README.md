@@ -25,7 +25,7 @@ using DeepRL
 
 env = POMDPEnvironment(TigerPOMDP())
 
-step = 1
+nsteps = 1
 done = false
 r_tot = 0.0
 
