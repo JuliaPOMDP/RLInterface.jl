@@ -9,7 +9,7 @@ are defined in this interface and vice versa.
 A shared interface between POMDPs.jl allows easy comparison of reinforcement learning solutions to approximate dynamic
 programming solutions when a complete model of the problem is defined.
 
-**Note**: Only environments with discrete action spaces are supported. Pull requests to spoort problems with continuous action spaces are welcome.
+**Note**: Only environments with discrete action spaces are supported. Pull requests to support problems with continuous action spaces are welcome.
 
 ## Interface
 
