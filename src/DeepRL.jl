@@ -25,8 +25,13 @@ export
     sample_action,
     n_actions,
     obs_dimensions,
-    render
+    render,
+    generate_info
 
+# XXX
+function generate_info(p::Union{MDP,POMDP}, s::S, a::A, sp::S) where {S,A}
+    return nothing
+end
 
 abstract type AbstractEnvironment end
 
@@ -78,13 +83,15 @@ step the environment forward. Return the state, reward,
 terminal flag and info
 """
 function step!(env::MDPEnvironment, a::A) where A
+    prev_s = env.state
     s, r = generate_sr(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
-    info = nothing
+    info = generate_info(env.problem, prev_s, a, s)
     obs = convert_s(Array{Float64}, s, env.problem)
     return obs, r, t, info
 end
+
 
 """
     step!{A}(env::MDPEnvironment, a::A)
@@ -93,10 +100,11 @@ step the environment forward. Return the observation, reward,
 terminal flag and info
 """
 function step!(env::POMDPEnvironment, a::A) where A
+    prev_s = env.state
     s, o, r = generate_sor(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
-    info = nothing
+    info = generate_info(env.problem, prev_s, a, s)
     obs = convert_o(Array{Float64}, o, env.problem)
     return obs, r, t, info
 end
