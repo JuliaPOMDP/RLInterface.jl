@@ -18,6 +18,7 @@ export
     AbstractEnvironment,
     POMDPEnvironment,
     MDPEnvironment,
+    KMarkovEnvironment,
     # supporting methods
     reset,
     step!,
@@ -142,5 +143,6 @@ Renders a graphic of the environment
 function render(env::AbstractEnvironment) end
 
 include("ZMQServer.jl")
+include("k_markov.jl")
 
 end # module
