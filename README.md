@@ -39,5 +39,18 @@ while !done && step <= nsteps
 end
 ```
 
+## Key Functions to Implement
 
+This interface relies on the following function:
+
+```julia
+convert_s(T::Type{A1}, state::A2, problem::Union{MDP, POMDP}) where A1<:AbstractArray
+```
+
+which should return something of type A1. As well as:
+
+```julia
+POMDPs.initial_state(problem::Union{MDP, POMDP}, rng::AbstractRNG)
+```
+which should return something of type State, where the argument problem is of type e.g. MDP{State, Action}
 
