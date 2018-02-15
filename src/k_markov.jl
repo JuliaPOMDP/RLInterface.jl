@@ -79,5 +79,5 @@ end
 
 function obs_dimensions(env::KMarkovEnvironment)
     obs_dim = size(convert_o(Array{Float64,1}, generate_o(env.problem, initial_state(env.problem, env.rng), env.rng), env.problem))
-    return (env.k, obs_dim...)
+    return (obs_dim..., env.k)
 end
