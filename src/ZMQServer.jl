@@ -65,15 +65,7 @@ function run_env_server(ip, port, prob::Union{MDP, POMDP}; fully_observable=!isa
     else
         env = POMDPEnvironment(prob)
     end
-    conn = ZMQTransport(ip, port, ZMQ.REP, true)
-    Logging.debug("running server...")
-    while true
-        msg = JSON.parse(recvreq(conn))
-        Logging.info("received request: ", msg)
-        respmsg = process!(env, msg)
-        sendresp(conn, respmsg)
-    end
-    close(conn)
+    run_env_server(ip, port, env)
 end
 
 function run_env_server(ip, port, env::AbstractEnvironment)
