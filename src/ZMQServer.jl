@@ -59,21 +59,21 @@ function process!(env::AbstractEnvironment, msg::Dict{String, Any})
     respmsg
 end
 
-function run_env_server(ip, port, prob::Union{MDP, POMDP}; fully_observable=!isa(prob, POMDP))
-    if fully_observable
-        env = MDPEnvironment(prob)
-    else
-        env = POMDPEnvironment(prob)
-    end
-    conn = ZMQTransport(ip, port, ZMQ.REP, true)
-    Logging.debug("running server...")
-    while true
-        msg = JSON.parse(recvreq(conn))
-        Logging.info("received request: ", msg)
-        respmsg = process!(env, msg)
-        sendresp(conn, respmsg)
-    end
-    close(conn)
+"""Run the ZMQ server with the environment
+
+By default we wrap an MDP problem into an MDP environment
+and a POMDP problem into a POMDP environment.
+"""
+function run_env_server end
+
+function run_env_server(ip, port, prob::MDP)
+    env = MDPEnvironment(prob)
+    run_env_server(ip, port, env)
+end
+
+function run_env_server(ip, port, prob::POMDP)
+    env = POMDPEnvironment(prob)
+    run_env_server(ip, port, env)
 end
 
 function run_env_server(ip, port, env::AbstractEnvironment)
