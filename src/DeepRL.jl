@@ -4,10 +4,10 @@
 module DeepRL
 
 using POMDPs
+using POMDPToolbox
 
 # for the ZMQ part
 using ZMQ
-using DeepRL
 using JSON
 
 import Logging
@@ -79,10 +79,9 @@ step the environment forward. Return the state, reward,
 terminal flag and info
 """
 function step!(env::MDPEnvironment, a::A) where A
-    s, r = generate_sr(env.problem, env.state, a, env.rng)
+    s, r, info = generate_sri(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
-    info = nothing
     obs = convert_s(Array{Float64, 1}, s, env.problem)
     return obs, r, t, info
 end
@@ -94,10 +93,9 @@ step the environment forward. Return the observation, reward,
 terminal flag and info
 """
 function step!(env::POMDPEnvironment, a::A) where A
-    s, o, r = generate_sor(env.problem, env.state, a, env.rng)
+    s, o, r, info = generate_sori(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
-    info = nothing
     obs = convert_o(Array{Float64, 1}, o, env.problem)
     return obs, r, t, info
 end
