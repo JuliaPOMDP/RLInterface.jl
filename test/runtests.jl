@@ -2,6 +2,8 @@ using DeepRL
 using POMDPModels
 using Base.Test
 
+include("zmq.jl")
+
 function sim(env, nsteps=100, rng=MersenneTwister(0))
     o = reset(env)
     step = 1
@@ -31,4 +33,5 @@ envs = [MDPEnvironment(GridWorld()),
 
 for env in envs
     r = sim(env)
+    process(env)
 end

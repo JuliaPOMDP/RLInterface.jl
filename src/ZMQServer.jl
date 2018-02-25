@@ -36,7 +36,7 @@ function sendresp(conn::ZMQTransport, msgstr)
     ZMQ.send(conn.sock, JSON.json(msgstr))
 end
 
-function process!(env::AbstractEnvironment, msg::Dict{String, Any})
+function process!(env::AbstractEnvironment, msg::Dict{String, T}) where T
     if "cmd" in keys(msg)
         if msg["cmd"] == "obs_dimensions"
             respmsg = Dict("obs_dim"=>obs_dimensions(env))
