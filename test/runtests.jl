@@ -1,6 +1,7 @@
 using DeepRL
 using POMDPModels
-using Base.Test
+using Test
+using Random
 
 include("zmq.jl")
 
@@ -24,10 +25,10 @@ end
 envs = [MDPEnvironment(GridWorld()),
         MDPEnvironment(InvertedPendulum()),
         MDPEnvironment(MountainCar()),
-        POMDPEnvironment(TMaze()),
+        # POMDPEnvironment(TMaze()),
         POMDPEnvironment(BabyPOMDP()),
         POMDPEnvironment(TigerPOMDP()),
-        KMarkovEnvironment(TMaze(), k=4),
+        # KMarkovEnvironment(TMaze(), k=4),
         KMarkovEnvironment(BabyPOMDP(), k=4),
         KMarkovEnvironment(TigerPOMDP(), k=4)]
 

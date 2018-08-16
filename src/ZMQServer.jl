@@ -19,20 +19,20 @@ end
 
 """Close connection to the socket"""
 function close(conn::ZMQTransport)
-    Logging.debug("closing connection...")
+    @debug("closing connection...")
     close(conn.sock)
 end
 
 """Receive request from the socket"""
 function recvreq(conn::ZMQTransport)
     reqstr = unsafe_string(ZMQ.recv(conn.sock))
-    Logging.debug("received request: ", reqstr)
+    @debug("received request: ", reqstr)
     reqstr
 end
 
 """Send response to the socket"""
 function sendresp(conn::ZMQTransport, msgstr)
-    Logging.debug("sending response: ", msgstr)
+    @debug("sending response: ", msgstr)
     ZMQ.send(conn.sock, JSON.json(msgstr))
 end
 
@@ -81,7 +81,7 @@ function run_env_server(ip, port, env::AbstractEnvironment)
     Logging.debug("running server...")
     while true
         msg = JSON.parse(recvreq(conn))
-        Logging.info("received request: ", msg)
+        @info("received request: ", msg)
         respmsg = process!(env, msg)
         sendresp(conn, respmsg)
     end

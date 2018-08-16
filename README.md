@@ -50,7 +50,7 @@ convert_s(T::Type{A1}, state::A2, problem::Union{MDP, POMDP}) where A1<:Abstract
 which should return something of type A1. As well as:
 
 ```julia
-POMDPs.initial_state(problem::Union{MDP, POMDP}, rng::AbstractRNG)
+POMDPs.initialstate(problem::Union{MDP, POMDP}, rng::AbstractRNG)
 ```
 which should return something of type State, where the argument problem is of type e.g. MDP{State, Action}
 
