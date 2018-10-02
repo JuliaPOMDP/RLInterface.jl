@@ -1,5 +1,8 @@
 # DeepRL
 
+[![Build Status](https://travis-ci.org/sisl/DeepRL.jl.svg?branch=master)](https://travis-ci.org/sisl/DeepRL.jl)
+[![Coverage Status](https://coveralls.io/repos/github/sisl/DeepRL.jl/badge.svg?branch=master)](https://coveralls.io/github/sisl/DeepRL.jl?branch=master)
+
 This package provides an interface for working with deep reinfrocement learning problems in Julia.
 It is closely integrated with [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl) to easily wrap problems defined in those formats. 
 While the focus of this interface is on partially observable Markov decision process (POMDP) reinforcement learning, it
