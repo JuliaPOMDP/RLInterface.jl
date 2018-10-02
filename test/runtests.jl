@@ -15,20 +15,19 @@ function sim(env, nsteps=100, rng=MersenneTwister(0))
     while !done && step <= nsteps
         action = sample_action(env)
         obs, rew, done, info = step!(env, action)
-        #println(obs, " ", rew, " ", done, " ", info)
         r_tot += rew
         step += 1
     end
     return r_tot
 end
 
-envs = [MDPEnvironment(GridWorld()),
+envs = [MDPEnvironment(SimpleGridWorld()),
         MDPEnvironment(InvertedPendulum()),
         MDPEnvironment(MountainCar()),
-        # POMDPEnvironment(TMaze()),
+        POMDPEnvironment(TMaze()),
         POMDPEnvironment(BabyPOMDP()),
         POMDPEnvironment(TigerPOMDP()),
-        # KMarkovEnvironment(TMaze(), k=4),
+        KMarkovEnvironment(TMaze(), k=4),
         KMarkovEnvironment(BabyPOMDP(), k=4),
         KMarkovEnvironment(TigerPOMDP(), k=4)]
 
