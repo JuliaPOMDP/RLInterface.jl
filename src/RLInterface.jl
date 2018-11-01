@@ -4,13 +4,12 @@ __precompile__()
 module RLInterface
 
 using POMDPs
-using POMDPToolbox
+using POMDPModelTools
 
 # for the ZMQ part
 using ZMQ
 using JSON
-
-import Logging
+using Random
 
 
 export
@@ -37,7 +36,7 @@ mutable struct MDPEnvironment{S} <: AbstractEnvironment
     rng::AbstractRNG
 end
 function MDPEnvironment(problem::MDP; rng::AbstractRNG=MersenneTwister(0))
-    return MDPEnvironment(problem, initial_state(problem, rng), rng)
+    return MDPEnvironment(problem, initialstate(problem, rng), rng)
 end
 
 mutable struct POMDPEnvironment{S} <: AbstractEnvironment
@@ -46,7 +45,7 @@ mutable struct POMDPEnvironment{S} <: AbstractEnvironment
     rng::AbstractRNG
 end
 function POMDPEnvironment(problem::POMDP; rng::AbstractRNG=MersenneTwister(0))
-    return POMDPEnvironment(problem, initial_state(problem, rng), rng)
+    return POMDPEnvironment(problem, initialstate(problem, rng), rng)
 end
 
 """
@@ -54,7 +53,7 @@ end
 Reset an MDP environment by sampling an initial state returning it.
 """
 function Base.reset(env::MDPEnvironment)
-    s = initial_state(env.problem, env.rng)
+    s = initialstate(env.problem, env.rng)
     env.state = s
     return convert_s(Array{Float64, 1}, s, env.problem)
 end
@@ -65,7 +64,7 @@ Reset an POMDP environment by sampling an initial state,
 generating an observation and returning it.
 """
 function Base.reset(env::POMDPEnvironment)
-    s = initial_state(env.problem, env.rng)
+    s = initialstate(env.problem, env.rng)
     env.state = s
     o = generate_o(env.problem, s, env.rng)
     return convert_o(Array{Float64, 1}, o, env.problem)
@@ -126,12 +125,12 @@ end
 
 
 function obs_dimensions(env::MDPEnvironment)
-    return size(convert_s(Array{Float64,1}, initial_state(env.problem, env.rng), env.problem))
+    return size(convert_s(Array{Float64,1}, initialstate(env.problem, env.rng), env.problem))
 end
 
 
 function obs_dimensions(env::POMDPEnvironment)
-    return size(convert_o(Array{Float64,1}, generate_o(env.problem, initial_state(env.problem, env.rng), env.rng), env.problem))
+    return size(convert_o(Array{Float64,1}, generate_o(env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
 end
 
 """

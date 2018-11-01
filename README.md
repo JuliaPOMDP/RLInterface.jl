@@ -1,5 +1,8 @@
 # RLInterface
 
+[![Build Status](https://travis-ci.org/sisl/DeepRL.jl.svg?branch=master)](https://travis-ci.org/sisl/DeepRL.jl)
+[![Coverage Status](https://coveralls.io/repos/github/sisl/DeepRL.jl/badge.svg?branch=master)](https://coveralls.io/github/sisl/DeepRL.jl?branch=master)
+
 This package provides an interface for working with deep reinfrocement learning problems in Julia.
 It is closely integrated with [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl) to easily wrap problems defined in those formats. 
 While the focus of this interface is on partially observable Markov decision process (POMDP) reinforcement learning, it
@@ -50,7 +53,7 @@ convert_s(T::Type{A1}, state::A2, problem::Union{MDP, POMDP}) where A1<:Abstract
 which should return something of type A1. As well as:
 
 ```julia
-POMDPs.initial_state(problem::Union{MDP, POMDP}, rng::AbstractRNG)
+POMDPs.initialstate(problem::Union{MDP, POMDP}, rng::AbstractRNG)
 ```
 which should return something of type State, where the argument problem is of type e.g. MDP{State, Action}
 
