@@ -1,7 +1,7 @@
 # RLInterface
 
-[![Build Status](https://travis-ci.org/sisl/DeepRL.jl.svg?branch=master)](https://travis-ci.org/sisl/DeepRL.jl)
-[![Coverage Status](https://coveralls.io/repos/github/sisl/DeepRL.jl/badge.svg?branch=master)](https://coveralls.io/github/sisl/DeepRL.jl?branch=master)
+[![Build Status](https://travis-ci.org/JuliaPOMDP/DeepRL.jl.svg?branch=master)](https://travis-ci.org/JuliaPOMDP/DeepRL.jl)
+[![Coverage Status](https://coveralls.io/repos/github/JuliaPOMDP/DeepRL.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaPOMDP/DeepRL.jl?branch=master)
 
 This package provides an interface for working with deep reinfrocement learning problems in Julia.
 It is closely integrated with [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl) to easily wrap problems defined in those formats. 
