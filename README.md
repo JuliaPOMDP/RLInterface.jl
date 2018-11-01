@@ -1,4 +1,4 @@
-# DeepRL
+# RLInterface
 
 This package provides an interface for working with deep reinfrocement learning problems in Julia.
 It is closely integrated with [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl) to easily wrap problems defined in those formats. 
@@ -21,7 +21,7 @@ Running a simulation can be done like so, we use a problem from
 
 ```julia
 using POMDPModels # for TigerPOMDP
-using DeepRL
+using RLInterface
 
 env = POMDPEnvironment(TigerPOMDP())
 

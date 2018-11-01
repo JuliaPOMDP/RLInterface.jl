@@ -1,4 +1,4 @@
-using DeepRL
+using RLInterface
 using POMDPModels
 using Base.Test
 

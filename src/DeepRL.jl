@@ -1,7 +1,7 @@
 __precompile__()
 
 
-module DeepRL
+module RLInterface
 
 using POMDPs
 using POMDPToolbox
