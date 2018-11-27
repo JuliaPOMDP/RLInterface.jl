@@ -66,10 +66,10 @@ generating an observation and returning it.
 function Base.reset(env::POMDPEnvironment)
     s = initialstate(env.problem, env.rng)
     env.state = s
-    o = generate_o(env.problem, s, env.rng)
+    a = first(actions(env))
+    o = generate_o(env.problem, s, a, s, env.rng)
     return convert_o(Array{Float64, 1}, o, env.problem)
 end
-
 
 """
     step!{A}(env::POMDPEnvironment, a::A)
@@ -123,14 +123,24 @@ function POMDPs.n_actions(env::Union{POMDPEnvironment, MDPEnvironment})
     return n_actions(env.problem)
 end
 
-
+"""
+    obs_dimensions(env::MDPEnvironment)
+returns the size of the observation vector.
+It generates an initial state, converts it to an array and returns its size.
+"""
 function obs_dimensions(env::MDPEnvironment)
     return size(convert_s(Array{Float64,1}, initialstate(env.problem, env.rng), env.problem))
 end
 
-
+"""
+    obs_dimensions(env::POMDPEnvironment)
+returns the size of the observation vector.
+It generates an initial observation, converts it to an array and returns its size.
+"""
 function obs_dimensions(env::POMDPEnvironment)
-    return size(convert_o(Array{Float64,1}, generate_o(env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
+    s = initialstate(env.problem, env.rng)
+    a = first(actions(env))
+    return size(convert_o(Array{Float64,1}, generate_o(env.problem, s,a,s, env.rng), env.problem))
 end
 
 """
