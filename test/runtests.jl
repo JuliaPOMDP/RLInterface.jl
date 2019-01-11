@@ -6,7 +6,7 @@ using Random
 include("zmq.jl")
 
 function sim(env, nsteps=100, rng=MersenneTwister(0))
-    o = reset(env)
+    o = reset!(env)
     step = 1
     done = false
     r_tot = 0.0

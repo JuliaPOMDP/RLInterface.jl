@@ -13,11 +13,11 @@ function KMarkovEnvironment(problem::POMDP; k::Int64=1, rng::AbstractRNG=Mersenn
 end
 
 """
-    reset(env::KMarkovEnvironment)
+    reset!(env::KMarkovEnvironment)
 Reset an POMDP environment by sampling an initial state,
 generating an observation and returning it.
 """
-function Base.reset(env::KMarkovEnvironment)
+function reset!(env::KMarkovEnvironment)
     s = initialstate(env.problem, env.rng)
     env.state = s
     o = generate_o(env.problem, s, env.rng)

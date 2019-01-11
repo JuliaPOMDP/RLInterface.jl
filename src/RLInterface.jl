@@ -1,6 +1,3 @@
-__precompile__()
-
-
 module RLInterface
 
 using POMDPs
@@ -19,13 +16,15 @@ export
     MDPEnvironment,
     KMarkovEnvironment,
     # supporting methods
-    reset,
+    reset!,
     step!,
     actions,
     sample_action,
     n_actions,
     obs_dimensions,
-    render
+    render,
+    # deprecated
+    reset
 
 
 abstract type AbstractEnvironment end
@@ -49,21 +48,21 @@ function POMDPEnvironment(problem::POMDP; rng::AbstractRNG=MersenneTwister(0))
 end
 
 """
-    reset(env::MDPEnvironment)
+    reset!(env::MDPEnvironment)
 Reset an MDP environment by sampling an initial state returning it.
 """
-function Base.reset(env::MDPEnvironment)
+function reset!(env::MDPEnvironment)
     s = initialstate(env.problem, env.rng)
     env.state = s
     return convert_s(Array{Float64, 1}, s, env.problem)
 end
 
 """
-    reset(env::POMDPEnvironment)
+    reset!(env::POMDPEnvironment)
 Reset an POMDP environment by sampling an initial state,
 generating an observation and returning it.
 """
-function Base.reset(env::POMDPEnvironment)
+function reset!(env::POMDPEnvironment)
     s = initialstate(env.problem, env.rng)
     env.state = s
     a = first(actions(env))
@@ -151,5 +150,11 @@ function render(env::AbstractEnvironment) end
 
 include("ZMQServer.jl")
 include("k_markov.jl")
+
+# deprecations
+import Base.reset
+@deprecate reset(env::KMarkovEnvironment) reset!(env)
+@deprecate reset(env::POMDPEnvironment) reset!(env)
+@deprecate reset(env::MDPEnvironment) reset!(env)
 
 end # module
