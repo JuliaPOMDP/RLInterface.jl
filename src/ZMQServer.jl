@@ -45,7 +45,7 @@ function process!(env::AbstractEnvironment, msg::Dict{String, T}) where T
         elseif msg["cmd"] == "render"
             render(env)
         elseif msg["cmd"] == "reset"
-            obs = reset(env)
+            obs = reset!(env)
             respmsg = Dict("obs"=> obs)
         elseif msg["cmd"] == "step"
             act_idx = msg["args"]
