@@ -28,18 +28,22 @@ using RLInterface
 
 env = POMDPEnvironment(TigerPOMDP())
 
-nsteps = 1
-done = false
-r_tot = 0.0
-
-o = reset(env)
-while !done && step <= nsteps
-    action = sample_action(env)
-    obs, rew, done, info = step!(env, action)
-    println(obs, " ", rew, " ", done, " ", info)
-    r_tot += rew
-    step += 1
+function simulate(env::AbstractEnvironment, nsteps::Int = 10)
+    done = false
+    r_tot = 0.0
+    step = 1
+    o = reset!(env)
+    while !done && step <= nsteps
+        action = sample_action(env) # take random action 
+        obs, rew, done, info = step!(env, action)
+        @show obs, rew, done, info
+        r_tot += rew
+        step += 1
+    end
+    return r_tot
 end
+
+@show simulate(env)
 ```
 
 ## Key Functions to Implement
