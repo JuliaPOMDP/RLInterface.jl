@@ -54,7 +54,7 @@ This interface relies on the following function:
 convert_s(T::Type{A1}, state::A2, problem::Union{MDP, POMDP}) where A1<:AbstractArray
 ```
 
-which should return something of type A1. As well as:
+which should return something of type `A1`. As well as:
 
 ```julia
 POMDPs.initialstate(problem::Union{MDP, POMDP}, rng::AbstractRNG)
