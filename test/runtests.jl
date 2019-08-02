@@ -48,4 +48,9 @@ end
     @inferred reset!(env)
     @inferred step!(env, 0)
     @inferred sim(env)
+
+    env = KMarkovEnvironment(TigerPOMDP(), k=4)
+    @inferred reset!(env)
+    @inferred step!(env, 0)
+    @inferred sim(env)
 end
