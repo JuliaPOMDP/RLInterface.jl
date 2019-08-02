@@ -35,6 +35,7 @@ end
     for env in envs
         r = sim(env)
         process(env)
+        @test length(actions(env)) == n_actions(env)
     end
 end
 
