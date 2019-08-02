@@ -1,15 +1,20 @@
 # a k-markov wrapper for MDPs and POMDPs
 # given a MDP or POMDP create an AbstractEnvironment where s_t = (o_t, ..., o_t-k)
 
-mutable struct KMarkovEnvironment{S} <: AbstractEnvironment
-    problem::POMDP
+mutable struct KMarkovEnvironment{M<:POMDP, S, N, R<:AbstractRNG} <: AbstractEnvironment
+    problem::M
     k::Int64
     state::S
-    obs::Array{Float64}
-    rng::AbstractRNG
+    obs::Array{Float32, N}
+    rng::R
 end
 function KMarkovEnvironment(problem::POMDP; k::Int64=1, rng::AbstractRNG=MersenneTwister(0))
-    return KMarkovEnvironment(problem, k, initialstate(problem, rng), zeros(k), rng)
+    # determine size of obs vector
+    s = initialstate(problem, rng)
+    o = generate_o(problem, s, rng)
+    obs = convert_o(Array{Float32, 1}, o, problem)
+    return KMarkovEnvironment(problem, k, initialstate(problem, rng), 
+                              zeros(Float32, size(obs)..., k), rng)
 end
 
 """
@@ -21,7 +26,7 @@ function reset!(env::KMarkovEnvironment)
     s = initialstate(env.problem, env.rng)
     env.state = s
     o = generate_o(env.problem, s, env.rng)
-    obs = convert_o(Array{Float64, 1}, o, env.problem)
+    obs = convert_o(Array{Float32, 1}, o, env.problem)
     # build a matrix of size (obs_dim..., k)
     obs_stacked = zeros(size(obs)..., env.k)
     for i=1:env.k
@@ -42,9 +47,9 @@ function step!(env::KMarkovEnvironment, a::A) where A
     env.state = s
     t = isterminal(env.problem, s)
     info = nothing
-    obs = convert_o(Array{Float64, 1}, o, env.problem)
+    obs = convert_o(Array{Float32, 1}, o, env.problem)
     # build a matrix of size (k, obs_dim..) , shift the old observation to lower indices
-    stack_obs = zeros(size(env.obs))
+    stack_obs = zeros(Float32, size(env.obs))
     for i=1:env.k-1
         stack_obs[Base.setindex(axes(env.obs), i, ndims(env.obs))...] = selectdim(env.obs, ndims(env.obs), i+1)
     end
@@ -78,6 +83,6 @@ function POMDPs.n_actions(env::KMarkovEnvironment)
 end
 
 function obs_dimensions(env::KMarkovEnvironment)
-    obs_dim = size(convert_o(Array{Float64,1}, generate_o(env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
+    obs_dim = size(convert_o(Array{Float32,1}, generate_o(env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
     return (obs_dim..., env.k)
 end
