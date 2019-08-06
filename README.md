@@ -61,6 +61,6 @@ POMDPs.initialstate(problem::Union{MDP, POMDP}, rng::AbstractRNG)
 ```
 which should return something of type State, where the argument problem is of type e.g. MDP{State, Action}
 
-To specify the type `A1` of the observation vector returned by the wrapper, you can implement the 
-`obsvector_type` function for your specific MDP or POMDP. This function default to `Vector{Float32}`. 
+The type of the observation vector returned by an environment, `A1` may be specified as an argument to the environment constructor.
+The default for a particular MDP or POMDP may be specified by implementing `obsvector_type`. This function default to `Vector{Float32}`. 
 It will be called when initializing any of the wrappers to determine the type to give as input to the `convert_s` function.

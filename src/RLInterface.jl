@@ -62,7 +62,7 @@ function POMDPEnvironment(problem::M,
 end
 
 """
-    reset!(env::MDPEnvironment{OV}) where OV
+    reset!(env::MDPEnvironment{OV})
 Reset an MDP environment by sampling an initial state returning it.
 """
 function reset!(env::MDPEnvironment{OV}) where OV
@@ -72,7 +72,7 @@ function reset!(env::MDPEnvironment{OV}) where OV
 end
 
 """
-    reset!(env::POMDPEnvironment{OV}) where OV
+    reset!(env::POMDPEnvironment{OV})
 Reset an POMDP environment by sampling an initial state,
 generating an observation and returning it.
 """
@@ -85,7 +85,7 @@ function reset!(env::POMDPEnvironment{OV}) where OV
 end
 
 """
-    step!{A}(env::MDPEnvironment{OV}, a::A) where {A, OV}
+    step!(env::MDPEnvironment{OV}, a::A)
 Take in an POMDP environment, and an action to execute, and
 step the environment forward. Return the state, reward,
 terminal flag and info
@@ -99,7 +99,7 @@ function step!(env::MDPEnvironment{OV}, a::A) where {OV, A}
 end
 
 """
-    step!{A}(env::POMDPEnvironment{OV}, a::A) where {OV, A}
+    step!(env::POMDPEnvironment{OV}, a::A)
 Take in an MDP environment, and an action to execute, and
 step the environment forward. Return the observation, reward,
 terminal flag and info

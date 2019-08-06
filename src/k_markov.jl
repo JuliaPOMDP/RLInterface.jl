@@ -24,7 +24,7 @@ function KMarkovEnvironment(problem::M,
 end
 
 """
-    reset!(env::KMarkovEnvironment{OV}) where OV
+    reset!(env::KMarkovEnvironment{OV})
 Reset an POMDP environment by sampling an initial state,
 generating an observation and returning it.
 """
@@ -38,7 +38,7 @@ function reset!(env::KMarkovEnvironment{OV}) where OV
 end
 
 """
-    step!{A}(env::POMDPEnvironment{OV}, a::A) where {OV, A}
+    step!(env::POMDPEnvironment{OV}, a::A)
 Take in an POMDP environment, and an action to execute, and
 step the environment forward. Return the observation, reward,
 terminal flag and info
@@ -82,7 +82,7 @@ function POMDPs.n_actions(env::KMarkovEnvironment)
 end
 
 """
-    obs_dimensions(env::KMarkovEnvironment{OV}) where OV
+    obs_dimensions(env::KMarkovEnvironment{OV})
 returns the size of the observation vector.
 The object return by `step!` and `reset!` is a vector of k observation vector of size `obs_dimensions(env)`
 It generates an initial state, converts it to an array and returns its size.
