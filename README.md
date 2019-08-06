@@ -46,18 +46,14 @@ end
 @show simulate(env)
 ```
 
-## Key Functions to Implement
+## Requirements for POMDPs.jl models
 
-This interface relies on the following function:
-
+To use POMDPs.jl models, the [generative interface](https://juliapomdp.github.io/POMDPs.jl/latest/generative/), including [`initialstate`](https://juliapomdp.github.io/POMDPs.jl/latest/api/#POMDPs.initialstate) must be implemented. In addition, the function
 ```julia
-convert_s(T::Type{A1}, state::A2, problem::Union{MDP, POMDP}) where A1<:AbstractArray
+convert_s(::Type{Vector{Float32}}, s::S, m::M)
 ```
-
-which should return something of type `A1`. As well as:
-
+where `M` is the `MDP` type with states of type `S`, or
 ```julia
-POMDPs.initialstate(problem::Union{MDP, POMDP}, rng::AbstractRNG)
+convert_o(::Type{Vector{Float32}}, o::O, m::M)
 ```
-which should return something of type State, where the argument problem is of type e.g. MDP{State, Action}
-
+where `M` is a `POMDP` with observation type `O`, will be used to convert the observation into a vector (Sometimes `Vector{Float32}` will be replaced with a different `AbstractVector` type if the environment is confibured differently).
