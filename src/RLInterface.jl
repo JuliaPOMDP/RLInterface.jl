@@ -29,72 +29,86 @@ export
 
 abstract type AbstractEnvironment end
 
-mutable struct MDPEnvironment{S} <: AbstractEnvironment
-    problem::MDP
+"""
+    obsvector_type(::Union{MDP, POMDP})
+
+Returns the type of the observation vector associated with a specific problem. 
+The `MDPEnvironment` and `POMDPEnvironment` wrappers will convert observations to an object of such type when `reset!` or `step!` is called.
+"""
+obsvector_type(::Union{MDP, POMDP}) = Vector{Float32}
+
+mutable struct MDPEnvironment{OV, M<:MDP, S, R<:AbstractRNG} <: AbstractEnvironment 
+    problem::M
     state::S
-    rng::AbstractRNG
+    rng::R
 end
-function MDPEnvironment(problem::MDP; rng::AbstractRNG=MersenneTwister(0))
-    return MDPEnvironment(problem, initialstate(problem, rng), rng)
+function MDPEnvironment(problem::M,
+                        ov::Type{A} = obsvector_type(problem);
+                        rng::R=MersenneTwister(0)) where {A<:AbstractArray, M<:MDP, R<:AbstractRNG}
+    S = statetype(problem)
+    return MDPEnvironment{ov, M, S, R}(problem, initialstate(problem, rng), rng)
 end
 
-mutable struct POMDPEnvironment{S} <: AbstractEnvironment
-    problem::POMDP
+mutable struct POMDPEnvironment{OV, M<:POMDP, S, R<:AbstractRNG} <: AbstractEnvironment
+    problem::M
     state::S
-    rng::AbstractRNG
+    rng::R
 end
-function POMDPEnvironment(problem::POMDP; rng::AbstractRNG=MersenneTwister(0))
-    return POMDPEnvironment(problem, initialstate(problem, rng), rng)
+function POMDPEnvironment(problem::M,
+                          ov::Type{A} = obsvector_type(problem);
+                          rng::R=MersenneTwister(0)) where {A<:AbstractArray, M<:POMDP, R<:AbstractRNG}
+    S = statetype(problem)
+    return POMDPEnvironment{ov, M, S, R}(problem, initialstate(problem, rng), rng)
 end
 
 """
-    reset!(env::MDPEnvironment)
+    reset!(env::MDPEnvironment{OV})
 Reset an MDP environment by sampling an initial state returning it.
 """
-function reset!(env::MDPEnvironment)
+function reset!(env::MDPEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     env.state = s
-    return convert_s(Array{Float64, 1}, s, env.problem)
+    return convert_s(OV, s, env.problem)
 end
 
 """
-    reset!(env::POMDPEnvironment)
+    reset!(env::POMDPEnvironment{OV})
 Reset an POMDP environment by sampling an initial state,
 generating an observation and returning it.
 """
-function reset!(env::POMDPEnvironment)
+function reset!(env::POMDPEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     env.state = s
     a = first(actions(env))
     o = generate_o(env.problem, s, a, s, env.rng)
-    return convert_o(Array{Float64, 1}, o, env.problem)
+    return convert_o(OV, o, env.problem)
 end
 
 """
-    step!{A}(env::POMDPEnvironment, a::A)
+    step!(env::MDPEnvironment{OV}, a::A)
 Take in an POMDP environment, and an action to execute, and
 step the environment forward. Return the state, reward,
 terminal flag and info
 """
-function step!(env::MDPEnvironment, a::A) where A
+function step!(env::MDPEnvironment{OV}, a::A) where {OV, A}
     s, r, info = generate_sri(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
-    obs = convert_s(Array{Float64, 1}, s, env.problem)
+    obs = convert_s(OV, s, env.problem)
     return obs, r, t, info
 end
 
 """
-    step!{A}(env::MDPEnvironment, a::A)
+    step!(env::POMDPEnvironment{OV}, a::A)
 Take in an MDP environment, and an action to execute, and
 step the environment forward. Return the observation, reward,
 terminal flag and info
 """
-function step!(env::POMDPEnvironment, a::A) where A
+function step!(env::POMDPEnvironment{OV}, a::A) where {OV, A}
     s, o, r, info = generate_sori(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
-    obs = convert_o(Array{Float64, 1}, o, env.problem)
+    obs = convert_o(OV, o, env.problem)
     return obs, r, t, info
 end
 
@@ -123,23 +137,23 @@ function POMDPs.n_actions(env::Union{POMDPEnvironment, MDPEnvironment})
 end
 
 """
-    obs_dimensions(env::MDPEnvironment)
+    obs_dimensions(env::MDPEnvironment{OV}) where OV
 returns the size of the observation vector.
 It generates an initial state, converts it to an array and returns its size.
 """
-function obs_dimensions(env::MDPEnvironment)
-    return size(convert_s(Array{Float64,1}, initialstate(env.problem, env.rng), env.problem))
+function obs_dimensions(env::MDPEnvironment{OV}) where OV
+    return size(convert_s(OV, initialstate(env.problem, env.rng), env.problem))
 end
 
 """
-    obs_dimensions(env::POMDPEnvironment)
+    obs_dimensions(env::POMDPEnvironment{OV}) where OV
 returns the size of the observation vector.
 It generates an initial observation, converts it to an array and returns its size.
 """
-function obs_dimensions(env::POMDPEnvironment)
+function obs_dimensions(env::POMDPEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     a = first(actions(env))
-    return size(convert_o(Array{Float64,1}, generate_o(env.problem, s,a,s, env.rng), env.problem))
+    return size(convert_o(OV, generate_o(env.problem, s,a,s, env.rng), env.problem))
 end
 
 """

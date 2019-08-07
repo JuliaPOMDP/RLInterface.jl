@@ -21,17 +21,37 @@ function sim(env, nsteps=100, rng=MersenneTwister(0))
     return r_tot
 end
 
-envs = [MDPEnvironment(SimpleGridWorld()),
-        MDPEnvironment(InvertedPendulum()),
-        MDPEnvironment(MountainCar()),
-        POMDPEnvironment(TMaze()),
-        POMDPEnvironment(BabyPOMDP()),
-        POMDPEnvironment(TigerPOMDP()),
-        KMarkovEnvironment(TMaze(), k=4),
-        KMarkovEnvironment(BabyPOMDP(), k=4),
-        KMarkovEnvironment(TigerPOMDP(), k=4)]
+@testset "Sim" begin
+    envs = [MDPEnvironment(SimpleGridWorld()),
+            MDPEnvironment(InvertedPendulum()),
+            MDPEnvironment(MountainCar()),
+            POMDPEnvironment(TMaze()),
+            POMDPEnvironment(BabyPOMDP()),
+            POMDPEnvironment(TigerPOMDP()),
+            KMarkovEnvironment(TMaze(), k=4),
+            KMarkovEnvironment(BabyPOMDP(), k=4),
+            KMarkovEnvironment(TigerPOMDP(), k=4)]
 
-for env in envs
-    r = sim(env)
-    process(env)
+    for env in envs
+        r = sim(env)
+        process(env)
+        @test length(actions(env)) == n_actions(env)
+    end
+end
+
+@testset "type stability" begin
+    env = MDPEnvironment(SimpleGridWorld())
+    @inferred reset!(env)
+    @inferred step!(env, :up)
+    @inferred sim(env)
+
+    env = POMDPEnvironment(TigerPOMDP())
+    @inferred reset!(env)
+    @inferred step!(env, 0)
+    @inferred sim(env)
+
+    env = KMarkovEnvironment(TigerPOMDP(), k=4)
+    @inferred reset!(env)
+    @inferred step!(env, 0)
+    @inferred sim(env)
 end
