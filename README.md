@@ -56,4 +56,4 @@ where `M` is the `MDP` type with states of type `S`, or
 ```julia
 convert_o(::Type{Vector{Float32}}, o::O, m::M)
 ```
-where `M` is a `POMDP` with observation type `O`, will be used to convert the observation into a vector (Sometimes `Vector{Float32}` will be replaced with a different `AbstractVector` type if the environment is confibured differently).
+where `M` is a `POMDP` with observation type `O`, will be used to convert the observation into a vector (Sometimes `Vector{Float32}` will be replaced with a different `AbstractVector` type if the environment is configured differently).
