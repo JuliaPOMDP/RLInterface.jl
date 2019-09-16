@@ -80,7 +80,7 @@ function reset!(env::POMDPEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     env.state = s
     a = first(actions(env))
-    o = generate_o(env.problem, s, a, s, env.rng)
+    o = gen(DBNOut(:o), env.problem, s, a, s, env.rng)
     return convert_o(OV, o, env.problem)
 end
 
@@ -91,7 +91,7 @@ step the environment forward. Return the state, reward,
 terminal flag and info
 """
 function step!(env::MDPEnvironment{OV}, a::A) where {OV, A}
-    s, r, info = generate_sri(env.problem, env.state, a, env.rng)
+    s, r, info = gen(DBNOut(:sp, :r, :info), env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
     obs = convert_s(OV, s, env.problem)
@@ -105,7 +105,7 @@ step the environment forward. Return the observation, reward,
 terminal flag and info
 """
 function step!(env::POMDPEnvironment{OV}, a::A) where {OV, A}
-    s, o, r, info = generate_sori(env.problem, env.state, a, env.rng)
+    s, o, r, info = gen(DBNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
     obs = convert_o(OV, o, env.problem)
@@ -126,14 +126,6 @@ Sample an action from the action space of the environment.
 """
 function sample_action(env::Union{POMDPEnvironment, MDPEnvironment})
     return rand(env.rng, actions(env))
-end
-
-"""
-    n_actions(env::Union{POMDPEnvironment, MDPEnvironment})
-Return the number of actions in the environment (environments with discrete action spaces only)
-"""
-function POMDPs.n_actions(env::Union{POMDPEnvironment, MDPEnvironment})
-    return n_actions(env.problem)
 end
 
 """

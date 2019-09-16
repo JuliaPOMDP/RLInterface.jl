@@ -14,7 +14,7 @@ function sim(env, nsteps=100, rng=MersenneTwister(0))
     step = 1
     done = false
     r_tot = 0.0
-    na = n_actions(env)
+    na = length(actions(env))
     dims = obs_dimensions(env)
     while !done && step <= nsteps
         action = sample_action(env)
