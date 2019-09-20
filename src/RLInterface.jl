@@ -80,7 +80,7 @@ function reset!(env::POMDPEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     env.state = s
     a = first(actions(env))
-    o = gen(DBNOut(:o), env.problem, s, a, s, env.rng)
+    o = gen(DDNOut(:o), env.problem, s, a, s, env.rng)
     return convert_o(OV, o, env.problem)
 end
 
@@ -91,7 +91,7 @@ step the environment forward. Return the state, reward,
 terminal flag and info
 """
 function step!(env::MDPEnvironment{OV}, a::A) where {OV, A}
-    s, r, info = gen(DBNOut(:sp, :r, :info), env.problem, env.state, a, env.rng)
+    s, r, info = gen(DDNOut(:sp, :r, :info), env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
     obs = convert_s(OV, s, env.problem)
@@ -105,7 +105,7 @@ step the environment forward. Return the observation, reward,
 terminal flag and info
 """
 function step!(env::POMDPEnvironment{OV}, a::A) where {OV, A}
-    s, o, r, info = gen(DBNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
+    s, o, r, info = gen(DDNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
     obs = convert_o(OV, o, env.problem)
@@ -145,7 +145,7 @@ It generates an initial observation, converts it to an array and returns its siz
 function obs_dimensions(env::POMDPEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     a = first(actions(env))
-    return size(convert_o(OV, generate_o(env.problem, s,a,s, env.rng), env.problem))
+    return size(convert_o(OV, gen(DDNOut{:o}, env.problem, s,a,s, env.rng), env.problem))
 end
 
 """
