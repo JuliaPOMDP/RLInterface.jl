@@ -12,10 +12,12 @@ mutable struct KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG} <: AbstractEn
 end
 function KMarkovEnvironment(problem::M,
                             ov::Type{A} = obsvector_type(problem);
-                            k::Int64=1, rng::AbstractRNG=MersenneTwister(0)) where {A<:AbstractArray, M, R<:AbstractRNG}
+                            k::Int64=1, 
+                            rng::AbstractRNG=MersenneTwister(0)
+                            ) where {A<:AbstractArray, M<:POMDP, R<:AbstractRNG}
     # determine size of obs vector
     s = initialstate(problem, rng)
-    o = gen(DDNOut{:o}, problem, s, rng)
+    o = gen(DDNNode{:o}(), problem, s, rng)
     obs = convert_o(ov, o, problem)
     # init vector of obs
     obsvec = fill(zeros(eltype(ov), size(obs)...), k)
@@ -31,7 +33,7 @@ generating an observation and returning it.
 function reset!(env::KMarkovEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     env.state = s
-    o = gen(DDNOut(:o), env.problem, s, env.rng)
+    o = gen(DDNNode{:o}(), env.problem, s, env.rng)
     obs = convert_o(OV, o, env.problem)
     fill!(env.obs, obs)
     return env.obs
@@ -54,7 +56,7 @@ function step!(env::KMarkovEnvironment{OV}, a::A) where {OV, A}
         env.obs[i] = env.obs[i + 1]
     end
     env.obs[env.k] = obs
-    return env.obs, r, t
+    return env.obs, r, t, info
 end
 
 """
@@ -81,6 +83,6 @@ The object return by `step!` and `reset!` is a vector of k observation vector of
 It generates an initial state, converts it to an array and returns its size.
 """
 function obs_dimensions(env::KMarkovEnvironment{OV}) where OV
-    obs_dim = size(convert_o(OV, gen(DDNOut(:o), env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
+    obs_dim = size(convert_o(OV, gen(DDNNode{:o}(), env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
     return (obs_dim..., env.k)
 end

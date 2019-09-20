@@ -79,8 +79,7 @@ generating an observation and returning it.
 function reset!(env::POMDPEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     env.state = s
-    a = first(actions(env))
-    o = gen(DDNOut(:o), env.problem, s, a, s, env.rng)
+    o = gen(DDNNode{:o}(), env.problem, s, env.rng)
     return convert_o(OV, o, env.problem)
 end
 
@@ -144,8 +143,7 @@ It generates an initial observation, converts it to an array and returns its siz
 """
 function obs_dimensions(env::POMDPEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
-    a = first(actions(env))
-    return size(convert_o(OV, gen(DDNOut{:o}, env.problem, s,a,s, env.rng), env.problem))
+    return size(convert_o(OV, gen(DDNNode{:o}(), env.problem, s, env.rng), env.problem))
 end
 
 """
