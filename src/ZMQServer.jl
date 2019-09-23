@@ -41,7 +41,7 @@ function process!(env::AbstractEnvironment, msg::Dict{String, T}) where T
         if msg["cmd"] == "obs_dimensions"
             respmsg = Dict("obs_dim"=>obs_dimensions(env))
         elseif msg["cmd"] == "n_actions"
-            respmsg = Dict("n_actions"=>n_actions(env))
+            respmsg = Dict("n_actions"=>length(actions(env)))
         elseif msg["cmd"] == "render"
             render(env)
         elseif msg["cmd"] == "reset"

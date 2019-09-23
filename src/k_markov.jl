@@ -1,9 +1,9 @@
 """
-    KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG} <: AbstractEnvironment
+    KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment
 A k-markov wrapper for MDPs and POMDPs, given a MDP or POMDP create an AbstractEnvironment where s_t = (o_t, ..., o_t-k)
 The K-Markov observation is represented by a vector of k observations.
 """
-mutable struct KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG} <: AbstractEnvironment
+mutable struct KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment
     problem::M
     k::Int64
     state::S
@@ -12,15 +12,19 @@ mutable struct KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG} <: AbstractEn
 end
 function KMarkovEnvironment(problem::M,
                             ov::Type{A} = obsvector_type(problem);
-                            k::Int64=1, rng::AbstractRNG=MersenneTwister(0)) where {A<:AbstractArray, M, R<:AbstractRNG}
+                            k::Int64=1, 
+                            rng::AbstractRNG=MersenneTwister(0)
+                            ) where {A<:AbstractArray, M<:POMDP, R<:AbstractRNG}
     # determine size of obs vector
     s = initialstate(problem, rng)
-    o = generate_o(problem, s, rng)
+    o = gen(DDNNode{:o}(), problem, s, rng)
     obs = convert_o(ov, o, problem)
     # init vector of obs
     obsvec = fill(zeros(eltype(ov), size(obs)...), k)
-    return KMarkovEnvironment(problem, k, initialstate(problem, rng), 
-                              obsvec, rng)
+    Info = :info in nodenames(DDNStructure(problem))
+    return KMarkovEnvironment{ov, M, typeof(s), typeof(rng), Info}(problem, k, 
+                                                              initialstate(problem, rng), 
+                                                                            obsvec, rng)
 end
 
 """
@@ -31,7 +35,7 @@ generating an observation and returning it.
 function reset!(env::KMarkovEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     env.state = s
-    o = generate_o(env.problem, s, env.rng)
+    o = gen(DDNNode{:o}(), env.problem, s, env.rng)
     obs = convert_o(OV, o, env.problem)
     fill!(env.obs, obs)
     return env.obs
@@ -44,10 +48,9 @@ step the environment forward. Return the observation, reward,
 terminal flag and info
 """
 function step!(env::KMarkovEnvironment{OV}, a::A) where {OV, A}
-    s, o, r = generate_sor(env.problem, env.state, a, env.rng)
+    s, o, r, info = _step!(env, a)
     env.state = s
     t = isterminal(env.problem, s)
-    info = nothing
     obs = convert_o(OV, o, env.problem)
     # shift the old observation to lower indices
     for i=1:env.k-1
@@ -55,6 +58,15 @@ function step!(env::KMarkovEnvironment{OV}, a::A) where {OV, A}
     end
     env.obs[env.k] = obs
     return env.obs, r, t, info
+end
+
+# dispatch on Info=true or false
+function _step!(env::KMarkovEnvironment{OV, M, S, R, true}, a::A) where {OV, M, S, R, A}
+    s, o, r, info = gen(DDNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
+end
+function _step!(env::KMarkovEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
+    s, o, r = gen(DDNOut(:sp, :o, :r), env.problem, env.state, a, env.rng)
+    return (s, o, r, nothing)
 end
 
 """
@@ -73,13 +85,6 @@ function sample_action(env::KMarkovEnvironment)
     return rand(env.rng, actions(env))
 end
 
-"""
-    n_actions(env::KMarkovEnvironment)
-Return the number of actions in the environment (environments with discrete action spaces only)
-"""
-function POMDPs.n_actions(env::KMarkovEnvironment)
-    return n_actions(env.problem)
-end
 
 """
     obs_dimensions(env::KMarkovEnvironment{OV})
@@ -88,6 +93,6 @@ The object return by `step!` and `reset!` is a vector of k observation vector of
 It generates an initial state, converts it to an array and returns its size.
 """
 function obs_dimensions(env::KMarkovEnvironment{OV}) where OV
-    obs_dim = size(convert_o(OV, generate_o(env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
+    obs_dim = size(convert_o(OV, gen(DDNNode{:o}(), env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
     return (obs_dim..., env.k)
 end
