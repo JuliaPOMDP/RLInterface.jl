@@ -1,9 +1,9 @@
 """
-    KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG} <: AbstractEnvironment
+    KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment
 A k-markov wrapper for MDPs and POMDPs, given a MDP or POMDP create an AbstractEnvironment where s_t = (o_t, ..., o_t-k)
 The K-Markov observation is represented by a vector of k observations.
 """
-mutable struct KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG} <: AbstractEnvironment
+mutable struct KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment
     problem::M
     k::Int64
     state::S
@@ -21,8 +21,10 @@ function KMarkovEnvironment(problem::M,
     obs = convert_o(ov, o, problem)
     # init vector of obs
     obsvec = fill(zeros(eltype(ov), size(obs)...), k)
-    return KMarkovEnvironment(problem, k, initialstate(problem, rng), 
-                              obsvec, rng)
+    Info = :info in nodenames(DDNStructure(problem))
+    return KMarkovEnvironment{ov, M, typeof(s), typeof(rng), Info}(problem, k, 
+                                                              initialstate(problem, rng), 
+                                                                            obsvec, rng)
 end
 
 """
@@ -46,10 +48,9 @@ step the environment forward. Return the observation, reward,
 terminal flag and info
 """
 function step!(env::KMarkovEnvironment{OV}, a::A) where {OV, A}
-    s, o, r, info = gen(DDNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
+    s, o, r, info = _step!(env, a)
     env.state = s
     t = isterminal(env.problem, s)
-    info = nothing
     obs = convert_o(OV, o, env.problem)
     # shift the old observation to lower indices
     for i=1:env.k-1
@@ -57,6 +58,15 @@ function step!(env::KMarkovEnvironment{OV}, a::A) where {OV, A}
     end
     env.obs[env.k] = obs
     return env.obs, r, t, info
+end
+
+# dispatch on Info=true or false
+function _step!(env::KMarkovEnvironment{OV, M, S, R, true}, a::A) where {OV, M, S, R, A}
+    s, o, r, info = gen(DDNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
+end
+function _step!(env::KMarkovEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
+    s, o, r = gen(DDNOut(:sp, :o, :r), env.problem, env.state, a, env.rng)
+    return (s, r, nothing)
 end
 
 """

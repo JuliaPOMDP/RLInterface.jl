@@ -37,7 +37,7 @@ The `MDPEnvironment` and `POMDPEnvironment` wrappers will convert observations t
 """
 obsvector_type(::Union{MDP, POMDP}) = Vector{Float32}
 
-mutable struct MDPEnvironment{OV, M<:MDP, S, R<:AbstractRNG} <: AbstractEnvironment 
+mutable struct MDPEnvironment{OV, M<:MDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment 
     problem::M
     state::S
     rng::R
@@ -46,10 +46,11 @@ function MDPEnvironment(problem::M,
                         ov::Type{A} = obsvector_type(problem);
                         rng::R=MersenneTwister(0)) where {A<:AbstractArray, M<:MDP, R<:AbstractRNG}
     S = statetype(problem)
-    return MDPEnvironment{ov, M, S, R}(problem, initialstate(problem, rng), rng)
+    Info = :info in nodenames(DDNStructure(problem))
+    return MDPEnvironment{ov, M, S, R, Info}(problem, initialstate(problem, rng), rng)
 end
 
-mutable struct POMDPEnvironment{OV, M<:POMDP, S, R<:AbstractRNG} <: AbstractEnvironment
+mutable struct POMDPEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment
     problem::M
     state::S
     rng::R
@@ -58,7 +59,8 @@ function POMDPEnvironment(problem::M,
                           ov::Type{A} = obsvector_type(problem);
                           rng::R=MersenneTwister(0)) where {A<:AbstractArray, M<:POMDP, R<:AbstractRNG}
     S = statetype(problem)
-    return POMDPEnvironment{ov, M, S, R}(problem, initialstate(problem, rng), rng)
+    Info = :info in nodenames(DDNStructure(problem))
+    return POMDPEnvironment{ov, M, S, R, Info}(problem, initialstate(problem, rng), rng)
 end
 
 """
@@ -90,11 +92,20 @@ step the environment forward. Return the state, reward,
 terminal flag and info
 """
 function step!(env::MDPEnvironment{OV}, a::A) where {OV, A}
-    s, r, info = gen(DDNOut(:sp, :r, :info), env.problem, env.state, a, env.rng)
+    s, r, info = _step!(env, a)
     env.state = s
     t = isterminal(env.problem, s)
     obs = convert_s(OV, s, env.problem)
     return obs, r, t, info
+end
+
+# dispatch on Info=true or false
+function _step!(env::MDPEnvironment{OV, M, S, R, true}, a::A) where {OV, M, S, R, A}
+    s, r, info = gen(DDNOut(:sp, :r, :info), env.problem, env.state, a, env.rng)
+end
+function _step!(env::MDPEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
+    s, r = gen(DDNOut(:sp, :r), env.problem, env.state, a, env.rng)
+    return (s, r, nothing)
 end
 
 """
@@ -104,11 +115,20 @@ step the environment forward. Return the observation, reward,
 terminal flag and info
 """
 function step!(env::POMDPEnvironment{OV}, a::A) where {OV, A}
-    s, o, r, info = gen(DDNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
+    s, o, r, info = _step!(env, a)
     env.state = s
     t = isterminal(env.problem, s)
     obs = convert_o(OV, o, env.problem)
     return obs, r, t, info
+end
+
+# dispatch on Info=true or false
+function _step!(env::POMDPEnvironment{OV, M, S, R, true}, a::A) where {OV, M, S, R, A}
+    s, o, r, info = gen(DDNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
+end
+function _step!(env::POMDPEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
+    s, o, r = gen(DDNOut(:sp, :o, :r), env.problem, env.state, a, env.rng)
+    return (s, r, nothing)
 end
 
 """
