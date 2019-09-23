@@ -66,7 +66,7 @@ function _step!(env::KMarkovEnvironment{OV, M, S, R, true}, a::A) where {OV, M, 
 end
 function _step!(env::KMarkovEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
     s, o, r = gen(DDNOut(:sp, :o, :r), env.problem, env.state, a, env.rng)
-    return (s, r, nothing)
+    return (s, o, r, nothing)
 end
 
 """
