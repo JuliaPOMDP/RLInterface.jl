@@ -17,7 +17,7 @@ function KMarkovEnvironment(problem::M,
                             ) where {A<:AbstractArray, M<:POMDP, R<:AbstractRNG}
     # determine size of obs vector
     s = initialstate(problem, rng)
-    o = gen(DDNNode{:o}(), problem, s, rng)
+    o = initialobs(problem, s, rng)
     obs = convert_o(ov, o, problem)
     # init vector of obs
     obsvec = fill(zeros(eltype(ov), size(obs)...), k)
@@ -35,7 +35,7 @@ generating an observation and returning it.
 function reset!(env::KMarkovEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
     env.state = s
-    o = gen(DDNNode{:o}(), env.problem, s, env.rng)
+    o = initialobs(env.problem, s, env.rng)
     obs = convert_o(OV, o, env.problem)
     fill!(env.obs, obs)
     return env.obs
@@ -93,6 +93,6 @@ The object return by `step!` and `reset!` is a vector of k observation vector of
 It generates an initial state, converts it to an array and returns its size.
 """
 function obs_dimensions(env::KMarkovEnvironment{OV}) where OV
-    obs_dim = size(convert_o(OV, gen(DDNNode{:o}(), env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
+    obs_dim = size(convert_o(OV, initialobs(env.problem, initialstate(env.problem, env.rng), env.rng), env.problem))
     return (obs_dim..., env.k)
 end
