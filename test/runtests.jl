@@ -38,7 +38,7 @@ end
     end
 end
 
-if VERSION > v"1.0"
+if VERSION >= v"1.1"
     @testset "type stability" begin
         env = MDPEnvironment(SimpleGridWorld())
         @inferred reset!(env)
