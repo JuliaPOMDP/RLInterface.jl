@@ -38,19 +38,21 @@ end
     end
 end
 
-@testset "type stability" begin
-    env = MDPEnvironment(SimpleGridWorld())
-    @inferred reset!(env)
-    @inferred step!(env, :up)
-    @inferred sim(env)
+if VERSION > v"1.0"
+    @testset "type stability" begin
+        env = MDPEnvironment(SimpleGridWorld())
+        @inferred reset!(env)
+        @inferred step!(env, :up)
+        @inferred sim(env)
 
-    env = POMDPEnvironment(TigerPOMDP())
-    @inferred reset!(env)
-    @inferred step!(env, 0)
-    @inferred sim(env)
+        env = POMDPEnvironment(TigerPOMDP())
+        @inferred reset!(env)
+        @inferred step!(env, 0)
+        @inferred sim(env)
 
-    env = KMarkovEnvironment(TigerPOMDP(), k=4)
-    @inferred reset!(env)
-    @inferred step!(env, 0)
-    @inferred sim(env)
+        env = KMarkovEnvironment(TigerPOMDP(), k=4)
+        @inferred reset!(env)
+        @inferred step!(env, 0)
+        @inferred sim(env)
+    end
 end
