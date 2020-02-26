@@ -12,10 +12,7 @@ are defined in this interface and vice versa.
 A shared interface between POMDPs.jl allows easy comparison of reinforcement learning solutions to approximate dynamic
 programming solutions when a complete model of the problem is defined.
 
-## Interface
-
-The interface provides an `AbstractEnvironment` type from which all custom environments
-should inherit. For an example see how this is done with [OpenAI Gym](https://github.com/sisl/Gym.jl). 
+## Simulation
 
 Running a simulation can be done like so, we use a problem from
 [POMDPModels](https://github.com/JuliaPOMDP/POMDPModels.jl) as an example:
@@ -43,6 +40,21 @@ end
 
 @show simulate(env)
 ```
+
+## Interface
+
+The interface provides an `AbstractEnvironment` type from which all custom environments
+should inherit. For an example see how this is done with [OpenAI Gym](https://github.com/sisl/Gym.jl). 
+
+Currently, the following functions make up the interface. See the docstrings for more information
+```julia
+reset!
+step!
+actions
+sample_action
+render
+```
+
 
 ## Requirements for POMDPs.jl models
 
