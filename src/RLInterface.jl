@@ -27,7 +27,7 @@ export
     reset
 
 
-abstract type AbstractEnvironment end
+abstract type AbstractEnvironment{OV} end
 
 """
     obsvector_type(::Union{MDP, POMDP})
@@ -37,7 +37,7 @@ The `MDPEnvironment` and `POMDPEnvironment` wrappers will convert observations t
 """
 obsvector_type(::Union{MDP, POMDP}) = Vector{Float32}
 
-mutable struct MDPEnvironment{OV, M<:MDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment 
+mutable struct MDPEnvironment{OV, M<:MDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment{OV}
     problem::M
     state::S
     rng::R
@@ -50,7 +50,7 @@ function MDPEnvironment(problem::M,
     return MDPEnvironment{ov, M, S, R, Info}(problem, initialstate(problem, rng), rng)
 end
 
-mutable struct POMDPEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment
+mutable struct POMDPEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment{OV}
     problem::M
     state::S
     rng::R

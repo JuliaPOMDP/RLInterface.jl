@@ -1,9 +1,9 @@
 """
-    KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment
+    KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment{OV}
 A k-markov wrapper for MDPs and POMDPs, given a MDP or POMDP create an AbstractEnvironment where s_t = (o_t, ..., o_t-k)
 The K-Markov observation is represented by a vector of k observations.
 """
-mutable struct KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment
+mutable struct KMarkovEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment{OV}
     problem::M
     k::Int64
     state::S
