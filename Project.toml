@@ -11,7 +11,7 @@ ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [compat]
 JSON = "0.21"
-POMDPModelTools = "0.2"
+POMDPModelTools = "0.2, 0.3"
 POMDPs = "0.7.3, 0.8"
 ZMQ = "1"
 
