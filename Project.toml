@@ -1,6 +1,6 @@
 name = "RLInterface"
 uuid = "3065fe53-3878-5aed-aae7-ab641be43734"
-version = "0.3.6"
+version = "0.3.7"
 
 [deps]
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
