@@ -37,7 +37,7 @@ The `MDPEnvironment` and `POMDPEnvironment` wrappers will convert observations t
 """
 obsvector_type(::Union{MDP, POMDP}) = Vector{Float32}
 
-mutable struct MDPEnvironment{OV, M<:MDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment{OV}
+mutable struct MDPEnvironment{OV, M<:MDP, S, R<:AbstractRNG} <: AbstractEnvironment{OV}
     problem::M
     state::S
     rng::R
@@ -46,11 +46,10 @@ function MDPEnvironment(problem::M,
                         ov::Type{A} = obsvector_type(problem);
                         rng::R=MersenneTwister(0)) where {A<:AbstractArray, M<:MDP, R<:AbstractRNG}
     S = statetype(problem)
-    Info = :info in nodenames(DDNStructure(problem))
-    return MDPEnvironment{ov, M, S, R, Info}(problem, rand(rng, initialstate(problem, rng)))
+    return MDPEnvironment{ov, M, S, R}(problem, rand(rng, initialstate(problem)), rng)
 end
 
-mutable struct POMDPEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment{OV}
+mutable struct POMDPEnvironment{OV, M<:POMDP, S, R<:AbstractRNG} <: AbstractEnvironment{OV}
     problem::M
     state::S
     rng::R
@@ -59,8 +58,7 @@ function POMDPEnvironment(problem::M,
                           ov::Type{A} = obsvector_type(problem);
                           rng::R=MersenneTwister(0)) where {A<:AbstractArray, M<:POMDP, R<:AbstractRNG}
     S = statetype(problem)
-    Info = :info in nodenames(DDNStructure(problem))
-    return POMDPEnvironment{ov, M, S, R, Info}(problem, rand(rng, initialstate(problem, rng)))
+    return POMDPEnvironment{ov, M, S, R}(problem, rand(rng, initialstate(problem)), rng)
 end
 
 """
@@ -81,7 +79,7 @@ generating an observation and returning it.
 function reset!(env::POMDPEnvironment{OV}) where OV
     s = rand(env.rng, initialstate(env.problem))
     env.state = s
-    o = initialobs(env.problem, s, env.rng)
+    o = rand(env.rng, initialobs(env.problem, s))
     return convert_o(OV, o, env.problem)
 end
 
@@ -92,20 +90,11 @@ step the environment forward. Return the state, reward,
 terminal flag and info
 """
 function step!(env::MDPEnvironment{OV}, a::A) where {OV, A}
-    s, r, info = _step!(env, a)
+    s, r, info = @gen(:sp, :r, :info)(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
     obs = convert_s(OV, s, env.problem)
     return obs, r, t, info
-end
-
-# dispatch on Info=true or false
-function _step!(env::MDPEnvironment{OV, M, S, R, true}, a::A) where {OV, M, S, R, A}
-    s, r, info = @gen(:sp, :r, :info)(env.problem, env.state, a, env.rng)
-end
-function _step!(env::MDPEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
-    s, r = @gen(:sp, :r)(env.problem, env.state, a, env.rng)
-    return (s, r, nothing)
 end
 
 """
@@ -115,20 +104,11 @@ step the environment forward. Return the observation, reward,
 terminal flag and info
 """
 function step!(env::POMDPEnvironment{OV}, a::A) where {OV, A}
-    s, o, r, info = _step!(env, a)
+    s, o, r, info = @gen(:sp, :o, :r, :info)(env.problem, env.state, a, env.rng)
     env.state = s
     t = isterminal(env.problem, s)
     obs = convert_o(OV, o, env.problem)
     return obs, r, t, info
-end
-
-# dispatch on Info=true or false
-function _step!(env::POMDPEnvironment{OV, M, S, R, true}, a::A) where {OV, M, S, R, A}
-    s, o, r, info = @gen(:sp, :o, :r, :info)(env.problem, env.state, a, env.rng)
-end
-function _step!(env::POMDPEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
-    s, o, r = @gen(:sp, :o, :r)(env.problem, env.state, a, env.rng)
-    return (s, o, r, nothing)
 end
 
 """
@@ -162,8 +142,9 @@ returns the size of the observation vector.
 It generates an initial observation, converts it to an array and returns its size.
 """
 function obs_dimensions(env::POMDPEnvironment{OV}) where OV
-    s = initialstate(env.problem, env.rng)
-    return size(convert_o(OV, rand(env.rng, initialobs(env.problem, s)), env.problem))
+    s = rand(env.rng, initialstate(env.problem))
+    o = rand(env.rng, initialobs(env.problem, s))
+    return size(convert_o(OV, o, env.problem))
 end
 
 """
