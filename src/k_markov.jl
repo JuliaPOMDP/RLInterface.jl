@@ -33,9 +33,9 @@ Reset an POMDP environment by sampling an initial state,
 generating an observation and returning it.
 """
 function reset!(env::KMarkovEnvironment{OV}) where OV
-    s = initialstate(env.problem, env.rng)
+    s = rand(env.rng, initialstate(env.problem))
     env.state = s
-    o = initialobs(env.problem, s, env.rng)
+    o = rand(env.rng, initialobs(env.problem, s))
     obs = convert_o(OV, o, env.problem)
     fill!(env.obs, obs)
     return env.obs
@@ -62,10 +62,10 @@ end
 
 # dispatch on Info=true or false
 function _step!(env::KMarkovEnvironment{OV, M, S, R, true}, a::A) where {OV, M, S, R, A}
-    s, o, r, info = gen(DDNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
+    s, o, r, info = @gen(:sp, :o, :r, :info)(env.problem, env.state, a, env.rng)
 end
 function _step!(env::KMarkovEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
-    s, o, r = gen(DDNOut(:sp, :o, :r), env.problem, env.state, a, env.rng)
+    s, o, r = @gen(:sp, :o, :r)(env.problem, env.state, a, env.rng)
     return (s, o, r, nothing)
 end
 

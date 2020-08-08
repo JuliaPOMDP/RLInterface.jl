@@ -47,7 +47,7 @@ function MDPEnvironment(problem::M,
                         rng::R=MersenneTwister(0)) where {A<:AbstractArray, M<:MDP, R<:AbstractRNG}
     S = statetype(problem)
     Info = :info in nodenames(DDNStructure(problem))
-    return MDPEnvironment{ov, M, S, R, Info}(problem, initialstate(problem, rng), rng)
+    return MDPEnvironment{ov, M, S, R, Info}(problem, rand(rng, initialstate(problem, rng)))
 end
 
 mutable struct POMDPEnvironment{OV, M<:POMDP, S, R<:AbstractRNG, Info} <: AbstractEnvironment{OV}
@@ -60,7 +60,7 @@ function POMDPEnvironment(problem::M,
                           rng::R=MersenneTwister(0)) where {A<:AbstractArray, M<:POMDP, R<:AbstractRNG}
     S = statetype(problem)
     Info = :info in nodenames(DDNStructure(problem))
-    return POMDPEnvironment{ov, M, S, R, Info}(problem, initialstate(problem, rng), rng)
+    return POMDPEnvironment{ov, M, S, R, Info}(problem, rand(rng, initialstate(problem, rng)))
 end
 
 """
@@ -68,7 +68,7 @@ end
 Reset an MDP environment by sampling an initial state returning it.
 """
 function reset!(env::MDPEnvironment{OV}) where OV
-    s = initialstate(env.problem, env.rng)
+    s = rand(env.rng, initialstate(env.problem))
     env.state = s
     return convert_s(OV, s, env.problem)
 end
@@ -79,7 +79,7 @@ Reset an POMDP environment by sampling an initial state,
 generating an observation and returning it.
 """
 function reset!(env::POMDPEnvironment{OV}) where OV
-    s = initialstate(env.problem, env.rng)
+    s = rand(env.rng, initialstate(env.problem))
     env.state = s
     o = initialobs(env.problem, s, env.rng)
     return convert_o(OV, o, env.problem)
@@ -101,10 +101,10 @@ end
 
 # dispatch on Info=true or false
 function _step!(env::MDPEnvironment{OV, M, S, R, true}, a::A) where {OV, M, S, R, A}
-    s, r, info = gen(DDNOut(:sp, :r, :info), env.problem, env.state, a, env.rng)
+    s, r, info = @gen(:sp, :r, :info)(env.problem, env.state, a, env.rng)
 end
 function _step!(env::MDPEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
-    s, r = gen(DDNOut(:sp, :r), env.problem, env.state, a, env.rng)
+    s, r = @gen(:sp, :r)(env.problem, env.state, a, env.rng)
     return (s, r, nothing)
 end
 
@@ -124,10 +124,10 @@ end
 
 # dispatch on Info=true or false
 function _step!(env::POMDPEnvironment{OV, M, S, R, true}, a::A) where {OV, M, S, R, A}
-    s, o, r, info = gen(DDNOut(:sp, :o, :r, :info), env.problem, env.state, a, env.rng)
+    s, o, r, info = @gen(:sp, :o, :r, :info)(env.problem, env.state, a, env.rng)
 end
 function _step!(env::POMDPEnvironment{OV, M, S, R, false}, a::A) where {OV, M, S, R, A}
-    s, o, r = gen(DDNOut(:sp, :o, :r), env.problem, env.state, a, env.rng)
+    s, o, r = @gen(:sp, :o, :r)(env.problem, env.state, a, env.rng)
     return (s, o, r, nothing)
 end
 
@@ -153,7 +153,7 @@ returns the size of the observation vector.
 It generates an initial state, converts it to an array and returns its size.
 """
 function obs_dimensions(env::MDPEnvironment{OV}) where OV
-    return size(convert_s(OV, initialstate(env.problem, env.rng), env.problem))
+    return size(convert_s(OV, rand(env.rng, initialstate(env.problem)), env.problem))
 end
 
 """
@@ -163,7 +163,7 @@ It generates an initial observation, converts it to an array and returns its siz
 """
 function obs_dimensions(env::POMDPEnvironment{OV}) where OV
     s = initialstate(env.problem, env.rng)
-    return size(convert_o(OV, initialobs(env.problem, s, env.rng), env.problem))
+    return size(convert_o(OV, rand(env.rng, initialobs(env.problem, s)), env.problem))
 end
 
 """
