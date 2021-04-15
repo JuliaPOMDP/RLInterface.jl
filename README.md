@@ -1,4 +1,4 @@
-***THIS PACKAGE IS DEPRECATED IN FAVOR OF [CommonRLInterface](https://github.com/JuliaReinforcementLearning/CommonRLInterface.jl)
+**THIS PACKAGE IS DEPRECATED IN FAVOR OF [CommonRLInterface](https://github.com/JuliaReinforcementLearning/CommonRLInterface.jl)**
 
 # RLInterface
 
