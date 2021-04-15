@@ -1,3 +1,5 @@
+***THIS PACKAGE IS DEPRECATED IN FAVOR OF [CommonRLInterface](https://github.com/JuliaReinforcementLearning/CommonRLInterface.jl)
+
 # RLInterface
 
 [![Build Status](https://travis-ci.org/JuliaPOMDP/RLInterface.jl.svg?branch=master)](https://travis-ci.org/JuliaPOMDP/RLInterface.jl)
